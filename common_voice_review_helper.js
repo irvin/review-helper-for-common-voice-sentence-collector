@@ -3,7 +3,8 @@
 (() => {
   let userName = document.querySelectorAll('.profile-widget a')[0].innerText;    // user account
   let batchPage = 30;   // num of pages per excute
-  let locale = location.hash && location.hash.match(/\/review\/(.*)/)[1];
+  let locale = location.hash && location.hash.match(/\/review\/(.*)/);
+  if (locale && locale.length) locale = locale[1];
 
   if (!userName) {
     console.error('userName undefind');
@@ -18,13 +19,14 @@
 
   fetch('https://kinto.mozvoice.org/v1/buckets/App/collections/Sentences_Meta_' + locale + '/records?has_Sentences_Meta_UserVote_' + userName + '=false&has_approved=false&_sort=createdAt')
     .then(response => {
-      if (response.status === 200) {
+      if (response.status == 200) {
         return response.json();
       } else {
         throw new Error('Something went wrong on api server!');
       }
     })
     .then(response => {
+      // collecting sentences already been downvote by soneone
       let invalid = {};
       response.data.forEach(function (res) {
         if (res.invalid && res.invalid.length) {
@@ -34,11 +36,9 @@
       return invalid;
     })
     .then(invalid => {
-      console.log('had been rejected by someone: ', invalid);
+      console.log('sentneces had been rejected by someone: ', invalid);
 
       function click_and_turn(i) {
-        // console.log('click_and_turn', i)
-
         for (let btn of document.querySelectorAll('.pager')) {
           if (btn.innerText == ">") {
             if (btn.classList.contains('active')) return 99;
@@ -56,7 +56,10 @@
           console.log(sentence_count+=1, text, 'valid:', (!invalid[text]));
 
           for (let $btn of $validator.querySelectorAll('.secondary')) {
-            if (!invalid[text] && (text.indexOf(' ') <= -1)) {
+            if ((locale == 'zh-HK' || locale == 'zh-TW') && (text.indexOf(' ') > 0)) {
+              if ($btn.innerText == "👎") $btn.click();
+            }
+            else if (!invalid[text]) {
               if ($btn.innerText == "👍") $btn.click();
             }
             else {
@@ -66,7 +69,7 @@
         }
 
         let next = click_and_turn(j);
-        if (next >= batchPage) return;
+        if (next >= batchPage - 1) return;
         window.setTimeout(function(){
           checkValid(next);
         }, 500);
