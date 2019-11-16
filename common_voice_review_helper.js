@@ -73,7 +73,7 @@
         }
 
         let next = click_and_turn(j);
-        if (next >= batchPage - 1) return;
+        if (next > batchPage - 1) return;
         window.setTimeout(function(){
           checkValid(next);
         }, 500);
