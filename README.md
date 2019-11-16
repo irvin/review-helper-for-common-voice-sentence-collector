@@ -1,8 +1,11 @@
 # Review helper for Common Voice Sentence Collector
 
-- Excute on console in inspector.
-- Default downvote any sentences with downvote from others, and upvote all remands.
+## How to use
+- Copy and excute [review helper script](https://github.com/irvin/review-helper-for-common-voice-sentence-collector/blob/master/common_voice_review_helper.js) from console in browser inspector,
+- or installed through [Firefox addon](https://addons.mozilla.org/firefox/addon/cv-review-helper/) (still in reviewing on AMO).
 
-## specific criteria
+The script will default downvote any sentences with downvote from others, and upvote all remands.
 
-- downvote any sentences with space in zh-TW / zh-HK
+## Special rules
+
+- Downvote any sentences with space in zh-TW / zh-HK
