@@ -55,15 +55,19 @@
           let text = $validator.querySelectorAll('.sentence-box')[0].innerText;
           console.log(sentence_count+=1, text, 'valid:', (!invalid[text]));
 
-          for (let $btn of $validator.querySelectorAll('.secondary')) {
-            if ((locale == 'zh-HK' || locale == 'zh-TW') && (text.indexOf(' ') > 0)) {
+          if ((locale == 'zh-HK' || locale == 'zh-TW') && (text.indexOf(' ') > 0)) {
+            for (let $btn of $validator.querySelectorAll('.secondary')) {
               if ($btn.innerText == "👎") $btn.click();
             }
-            else if (!invalid[text]) {
+          }
+          else if (invalid[text]) {
+            for (let $btn of $validator.querySelectorAll('.secondary')) {
+              if ($btn.innerText == "👎") $btn.click();
+            }
+          }
+          else {
+            for (let $btn of $validator.querySelectorAll('.secondary')) {
               if ($btn.innerText == "👍") $btn.click();
-            }
-            else {
-              if ($btn.innerText == "👎") $btn.click();
             }
           }
         }
