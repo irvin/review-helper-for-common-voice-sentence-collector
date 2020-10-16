@@ -13,12 +13,12 @@
     "scripts": ["background.js"]
   },
   "page_action": {
-    "show_matches": ["https://common-voice.github.io/sentence-collector/*"],
+    "show_matches": ["https://commonvoice.mozilla.org/sentence-collector/*"],
     "browser_style": true,
     "default_title": "test"
   },
   "permissions": [
     "activeTab",
-    "https://kinto.mozvoice.org/"
+    "https://commonvoice.mozilla.org/"
   ]
 }
