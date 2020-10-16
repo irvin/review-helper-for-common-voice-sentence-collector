@@ -17,7 +17,10 @@
 
   let sentence_count = 0;
 
-  fetch('https://kinto.mozvoice.org/v1/buckets/App/collections/Sentences_Meta_' + locale + '/records?has_Sentences_Meta_UserVote_' + userName + '=false&has_approved=false&_sort=createdAt')
+  // fixme: hijack default page request to reduce requesting
+  // console.log('before fetch')
+
+  fetch('https://commonvoice.mozilla.org/sentence-collector/sentences/review?locale=' + locale)
     .then(response => {
       if (response.status == 200) {
         return response.json();
