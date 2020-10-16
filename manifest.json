@@ -2,7 +2,7 @@
   "description": "Review Helper for Common Voice Sentences Collector",
   "manifest_version": 2,
   "name": "Sentence Collector Review helper",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "applications": {
     "gecko": {
       "id": "review.helper@irvin",
@@ -13,12 +13,12 @@
     "scripts": ["background.js"]
   },
   "page_action": {
-    "show_matches": ["https://common-voice.github.io/sentence-collector/*"],
+    "show_matches": ["https://commonvoice.mozilla.org/sentence-collector/*"],
     "browser_style": true,
     "default_title": "test"
   },
   "permissions": [
     "activeTab",
-    "https://kinto.mozvoice.org/"
+    "https://commonvoice.mozilla.org/"
   ]
 }
