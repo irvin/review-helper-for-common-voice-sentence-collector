@@ -33,9 +33,11 @@
       let invalid = {};
       let valid = {};
       response.forEach(function (res) {
-        if (res.number_of_approving_votes != res.number_of_votes) {
+        const number_of_approving_votes = res.number_of_approving_votes || 0;
+        const number_of_votes = res.number_of_votes || 0;
+        if (number_of_approving_votes != number_of_votes) {
           invalid[res.sentence] = true;
-        } else if (res.number_of_votes > 0) {
+        } else if (number_of_votes > 0) {
           valid[res.sentence] = true;
         }
       });
@@ -68,10 +70,14 @@
 
           for (let $btn of $validator.querySelectorAll('.secondary')) {
             if ($btn.innerText == "👎" && invalid[text]) {
-              $btn.click();
+              if (!$btn.classList.contains('no')) {
+                $btn.click();
+              }
             }
             else if ($btn.innerText == "👍" && valid[text]) {
-              $btn.click();
+              if (!$btn.classList.contains('yes')) {
+                $btn.click();
+              }
             }
           }
         }
