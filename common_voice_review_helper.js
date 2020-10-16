@@ -3,8 +3,8 @@
 (() => {
   let userName = document.querySelectorAll('.profile-widget a')[0].innerText;    // user account
   let batchPage = 30;   // num of pages per excute
-  let locale = location.hash && location.hash.match(/\/review\/(.*)/);
-  if (locale && locale.length) locale = locale[1];
+  let selector = document.querySelector('select.language-selector');
+  let locale = selector.options[selector.selectedIndex].value;
 
   if (!userName) {
     console.error('userName undefind');
@@ -17,7 +17,10 @@
 
   let sentence_count = 0;
 
-  fetch('https://kinto.mozvoice.org/v1/buckets/App/collections/Sentences_Meta_' + locale + '/records?has_Sentences_Meta_UserVote_' + userName + '=false&has_approved=false&_sort=createdAt')
+  // fixme: hijack default page request to reduce requesting
+  // console.log('before fetch')
+
+  fetch('https://commonvoice.mozilla.org/sentence-collector/sentences/review?locale=' + locale)
     .then(response => {
       if (response.status == 200) {
         return response.json();
@@ -28,14 +31,17 @@
     .then(response => {
       // collecting sentences already been downvote by soneone
       let invalid = {};
-      response.data.forEach(function (res) {
-        if (res.invalid && res.invalid.length) {
+      let valid = {};
+      response.forEach(function (res) {
+        if (res.number_of_approving_votes != res.number_of_votes) {
           invalid[res.sentence] = true;
+        } else if (res.number_of_votes > 0) {
+          valid[res.sentence] = true;
         }
       });
-      return invalid;
+      return [invalid, valid];
     })
-    .then(invalid => {
+    .then(([invalid, valid]) => {
       console.log('sentneces had been rejected by someone: ', invalid);
 
       function click_and_turn(i) {
@@ -50,24 +56,22 @@
 
       function checkValid(j) {
         // console.log('checkValid', j);
-
         for (let $validator of document.querySelectorAll('.validator')) {
-          let text = $validator.querySelectorAll('.sentence-box')[0].innerText;
+          let text = $validator.querySelectorAll('.sentence-box>p')[0].innerText;
           console.log(sentence_count+=1, text, 'valid:', (!invalid[text]));
 
-          if ((locale == 'zh-HK' || locale == 'zh-TW') && (text.indexOf(' ') > 0)) {
-            for (let $btn of $validator.querySelectorAll('.secondary')) {
-              if ($btn.innerText == "👎") $btn.click();
+          // if ((locale == 'zh-HK' || locale == 'zh-TW') && (text.indexOf(' ') > 0)) {
+          //   for (let $btn of $validator.querySelectorAll('.secondary')) {
+          //     if ($btn.innerText == "👎") $btn.click();
+          //   }
+          // }
+
+          for (let $btn of $validator.querySelectorAll('.secondary')) {
+            if ($btn.innerText == "👎" && invalid[text]) {
+              $btn.click();
             }
-          }
-          else if (invalid[text]) {
-            for (let $btn of $validator.querySelectorAll('.secondary')) {
-              if ($btn.innerText == "👎") $btn.click();
-            }
-          }
-          else {
-            for (let $btn of $validator.querySelectorAll('.secondary')) {
-              if ($btn.innerText == "👍") $btn.click();
+            else if ($btn.innerText == "👍" && valid[text]) {
+              $btn.click();
             }
           }
         }
