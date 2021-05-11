@@ -17,8 +17,8 @@
   function clickValid(j) {
     // console.log('checkValid', j);
     for (let $validator of document.querySelectorAll('.validator')) {
-      for (let $btn of $validator.querySelectorAll('.secondary')) {
-        if (($btn.innerText == "👍") && (!$btn.classList.contains('yes'))) {
+      for (let $btn of $validator.querySelectorAll('button')) {
+        if ($btn.innerText == "👍") {
           $btn.click();
         }
       }
