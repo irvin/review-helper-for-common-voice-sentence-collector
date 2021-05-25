@@ -2,7 +2,7 @@
   "description": "Review Helper for Common Voice Sentences Collector",
   "manifest_version": 2,
   "name": "Sentence Collector Review helper",
-  "version": "0.0.2.1",
+  "version": "0.0.2.2",
   "applications": {
     "gecko": {
       "id": "review.helper@irvin",

@@ -1,13 +1,12 @@
 // script to default downvote any sentences that had been downvote, and upvote others
-
-(() => {
-  let userName = document.querySelectorAll('.profile-widget a')[0].innerText;    // user account
+var runReview = () => {
+  // let userName = document.querySelectorAll('.profile-widget a')[0].innerText;    // user account
   let batchPage = 30;   // num of pages per excute
   let selector = document.querySelector('select.language-selector');
   let locale = selector.options[selector.selectedIndex].value;
 
-  if (!userName) {
-    console.error('userName undefind');
+  if (!document.querySelector('a[href="#/profile"]')) {
+    console.error('User not logged in');
     return;
   }
   if (!locale) {
@@ -68,7 +67,7 @@
           //   }
           // }
 
-          for (let $btn of $validator.querySelectorAll('.secondary')) {
+          for (let $btn of $validator.querySelectorAll('button')) {
             if ($btn.innerText == "👎" && invalid[text]) {
               if (!$btn.classList.contains('no')) {
                 $btn.click();
@@ -91,4 +90,5 @@
 
       checkValid(0);
     });
-})();
+}
+runReview()
