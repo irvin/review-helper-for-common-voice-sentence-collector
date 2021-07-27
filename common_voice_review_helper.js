@@ -46,4 +46,5 @@
   })
 
   console.log(result)
+  location.reload()
 })();
