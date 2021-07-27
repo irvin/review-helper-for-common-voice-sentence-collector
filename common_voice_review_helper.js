@@ -1,26 +1,14 @@
 // script to default downvote any sentences that had been downvote, and upvote others
-
-(() => {
-  let userName = document.querySelectorAll('.profile-widget a')[0].innerText;    // user account
-  let batchPage = 30;   // num of pages per excute
+(async () => {
   let selector = document.querySelector('select.language-selector');
-  let locale = selector.options[selector.selectedIndex].value;
-
-  if (!userName) {
-    console.error('userName undefind');
-    return;
-  }
+  let locale = selector?.options[selector.selectedIndex].value || '';
   if (!locale) {
-    console.error('locale not found, you\'re probably not on the review page');
-    return;
+    return
   }
-
-  let sentence_count = 0;
 
   // fixme: hijack default page request to reduce requesting
   // console.log('before fetch')
-
-  fetch('https://commonvoice.mozilla.org/sentence-collector/sentences/review?locale=' + locale)
+  const sentences = await fetch('https://commonvoice.mozilla.org/sentence-collector/sentences/review?locale=' + locale)
     .then(response => {
       if (response.status == 200) {
         return response.json();
@@ -28,67 +16,34 @@
         throw new Error('Something went wrong on api server!');
       }
     })
-    .then(response => {
-      // collecting sentences already been downvote by soneone
-      let invalid = {};
-      let valid = {};
-      response.forEach(function (res) {
-        const number_of_approving_votes = res.number_of_approving_votes || 0;
-        const number_of_votes = res.number_of_votes || 0;
-        if (number_of_approving_votes != number_of_votes) {
-          invalid[res.sentence] = true;
-        } else if (number_of_votes > 0) {
-          valid[res.sentence] = true;
-        }
-      });
-      return [invalid, valid];
+
+  // collecting sentences already been downvote by someone
+  const validatedData = sentences.reduce((acc, cur) => {
+    const number_of_approving_votes = cur.number_of_approving_votes || 0;
+    const number_of_votes = cur.number_of_votes || 0;
+    if (number_of_approving_votes != number_of_votes) {
+      acc.invalidated.push(cur.id)
+    } else if (number_of_votes > 0) {
+      acc.validated.push(cur.id)
+    }
+    return acc
+  }, {invalidated: [], validated: []})
+
+  // send validatedData to API server
+  const result = await fetch('https://commonvoice.mozilla.org/sentence-collector/votes', {
+    method: 'PUT',
+    body: JSON.stringify(validatedData),
+    headers: new Headers({
+      'Content-Type': 'application/json',
     })
-    .then(([invalid, valid]) => {
-      console.log('sentneces had been rejected by someone: ', invalid);
+  }).then(response => {
+    if (response.status == 201) {
+      return response.json();
+    } else {
+      console.log(response)
+      throw new Error('Something went wrong on api server!');
+    }
+  })
 
-      function click_and_turn(i) {
-        for (let btn of document.querySelectorAll('.pager')) {
-          if (btn.innerText == ">") {
-            if (btn.classList.contains('active')) return 99;
-            btn.click();
-            return i+1;
-          }
-        }
-      }
-
-      function checkValid(j) {
-        // console.log('checkValid', j);
-        for (let $validator of document.querySelectorAll('.validator')) {
-          let text = $validator.querySelectorAll('.sentence-box>p')[0].innerText;
-          console.log(sentence_count+=1, text, 'valid:', (!invalid[text]));
-
-          // if ((locale == 'zh-HK' || locale == 'zh-TW') && (text.indexOf(' ') > 0)) {
-          //   for (let $btn of $validator.querySelectorAll('.secondary')) {
-          //     if ($btn.innerText == "👎") $btn.click();
-          //   }
-          // }
-
-          for (let $btn of $validator.querySelectorAll('.secondary')) {
-            if ($btn.innerText == "👎" && invalid[text]) {
-              if (!$btn.classList.contains('no')) {
-                $btn.click();
-              }
-            }
-            else if ($btn.innerText == "👍" && valid[text]) {
-              if (!$btn.classList.contains('yes')) {
-                $btn.click();
-              }
-            }
-          }
-        }
-
-        let next = click_and_turn(j);
-        if (next > batchPage - 1) return;
-        window.setTimeout(function(){
-          checkValid(next);
-        }, 500);
-      }
-
-      checkValid(0);
-    });
+  console.log(result)
 })();
